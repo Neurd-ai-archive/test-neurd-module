@@ -1,4 +1,5 @@
 import git, pathlib, shutil
+import os, errno
 
 BASEDIR = pathlib.Path(__file__).parent
 
@@ -30,6 +31,13 @@ def append_new_line(file_name, text_to_append): # Append given text as a new lin
 def gcloud_build_push(): #TBD, should use the gcloud api container (we'll create and endpoint)
     return 'url'
 
+def make_dir(path_to_dir):
+    try:
+        os.makedirs(path_to_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
 def updateDirs():
     #STEP Clone a repo locally (later/now all this will be a container)
     # Check if URL is https or ssh automatically
@@ -42,8 +50,14 @@ def updateDirs():
     if not pathlib.Path(NEURD_CONFIG_FILEPATH).is_file() or not pathlib.Path(NEURD_DOCKERFILE_FILEPATH).is_file():
         return False
 
-    #STEP Create an app directory with the flask and flask-restful app, exposing a /process endpoint that receives a POST request with all the data required in a json (image + data, for instance); you can use the one already done, delete extra stuff, and make it use environmental variables for user-defined parameters (input, output, process method file to call something like os.environ.get("USER_DEFINED_PROCESS_FILE").process(INPUT_FILEPATH, OUTPUT_FILEPATH)
+    #STEP Create an app directory with the flask and flask-restful app, 
+    # exposing a /process endpoint that receives a POST request with all the data required in a json (image + data, for instance); 
+    # you can use the one already done, delete extra stuff, and make it use environmental variables for user-defined parameters 
+    # (input, output, process method file to call something like os.environ.get("USER_DEFINED_PROCESS_FILE").process(INPUT_FILEPATH, OUTPUT_FILEPATH)
+
+
     #STEP Create the gunicorn.sh file (same as example)
+
     #STEP Create the gunicorn.conf.py file (same as example)
     shutil.copytree('./_neurd_container_server', TARGET_DIR)
 
@@ -57,3 +71,7 @@ def updateDirs():
 
     #STEP Return this url from the previous step (later on, a neurd-owned URL redirector we create, not the gcr.io)
     return image_url
+
+
+if __name__ == "__main__":
+    updateDirs()
